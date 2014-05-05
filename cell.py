@@ -7,3 +7,6 @@ class Cell(object):
         self.id = id
         self.x = x
         self.y = y
+
+    def __str__(self):
+        return 'Cell id:{} alive:{} x:{} y:{}'.format(self.id, self.alive, self.x, self.y)

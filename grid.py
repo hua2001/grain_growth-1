@@ -40,49 +40,51 @@ class Grid(object):
         """
         Moore neighbourhood
         """
-        for i in range(self.rows):
-            for j in range(self.cols):
-                if self.board[i][j].id != -1 and self.board[i][j].alive:
-                    cell_id = self.board[i][j].id
+        while(not self.full()):
+            for id in self.starting_embryos_location.keys():
+                new_embryos = list()
+                for cell in self.starting_embryos_location[id]:
                     # Cell on the right
-                    if j + 1 < self.cols and self.board[i][j + 1].id == -1:
-                        self.board[i][j + 1].id = cell_id
-                        self.board[i][j + 1].alive = True
-                        # Cell on the left
-                    if j - 1 >= 0 and self.board[i][j - 1].id == -1:
-                        self.board[i][j - 1].id = cell_id
-                        self.board[i][j - 1].alive = True
-                        # Cell on the top
-                    if i + 1 < self.rows and self.board[i + 1][j].id == -1:
-                        self.board[i + 1][j].id = cell_id
-                        self.board[i + 1][j].alive = True
-                        # Cell on the bottom
-                    if i - 1 >= 0 and self.board[i - 1][j].id == -1:
-                        self.board[i - 1][j].id = cell_id
-                        self.board[i - 1][j].alive = True
-                        # Cell on the top right
-                    if j + 1 < self.cols and i + 1 < self.rows and self.board[i][j + 1].id == -1:
-                        self.board[i + 1][j + 1].id = cell_id
-                        self.board[i + 1][j + 1].alive = True
-                        # Cell on the top left
-                    if j - 1 >= 0 and i + 1 < self.rows and self.board[i][j - 1].id == -1:
-                        self.board[i + 1][j - 1].id = cell_id
-                        self.board[i + 1][j - 1].alive = True
-                        # Cell on the bottom right
-                    if i - 1 >= 0 and j + 1 < self.cols and self.board[i - 1][j].id == -1:
-                        self.board[i - 1][j + 1].id = cell_id
-                        self.board[i - 1][j + 1].alive = True
-                        # Cell on the bottom left
-                    if i - 1 >= 0 and j - 1 >= 0 and self.board[i - 1][j].id == -1:
-                        self.board[i - 1][j - 1].id = cell_id
-                        self.board[i - 1][j - 1].alive = True
+                    if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id == -1:
+                        # Add new embryo
+                        new_embryos.append(Cell(cell.x+1, cell.y, True, cell.id))
+                    # Cell on the left
+                    if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id == -1:
+                        # Add new embryo
+                        new_embryos.append(Cell(cell.x-1, cell.y, True, cell.id))
+                    # Cell on the bottom
+                    if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id == -1:
+                        # Add new embryo
+                        new_embryos.append(Cell(cell.x, cell.y+1, True, cell.id))
+                    # Cell on the top
+                    if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id == -1:
+                        # Add new embryo
+                        new_embryos.append(Cell(cell.x, cell.y-1, True, cell.id))
+                    # Cell on the top left
+                    if cell.x - 1 >= 0 and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x - 1] == -1:
+                        new_embryos.append(Cell(cell.x-1, cell.y-1, True, cell.id))
+                    # Cell on the top right
+                    if cell.x + 1 < self.cols and cell.y -1 >= 0 and self.board[cell.y - 1][cell.x + 1] == -1:
+                        new_embryos.append(Cell(cell.x+1, cell.y-1, True, cell.id))
+                    # Cell on the bottom left
+                    if cell.x - 1 >= 0 and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x - 1] == -1:
+                        new_embryos.append(Cell(cell.x-1, cell.y-1, True, cell.id))
+                    # Cell on the bottom right
+                    if cell.x + 1 < self.cols and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x - 1] == -1:
+                        new_embryos.append(Cell(cell.x-1, cell.y-1, True, cell.id))
+                del self.starting_embryos_location[id]
+                self.starting_embryos_location[id] = list()
+                self.starting_embryos_location[id].extend(new_embryos)
+                # Add new seeds
+                for cell in new_embryos:
+                    self.board[cell.y][cell.x] = cell
 
     def von_neuman(self):
         """
         Von Neuman neighbourhood
         """
         while(not self.full()):
-            for nr, id in enumerate(self.starting_embryos_location.keys()):
+            for id in self.starting_embryos_location.keys():
                 new_embryos = list()
                 for cell in self.starting_embryos_location[id]:
                     # Cell on the right
@@ -182,9 +184,13 @@ class Grid(object):
 
 
 if __name__ == '__main__':
-    grid = Grid(30, 20)
-
+    grid = Grid(15, 15)
+    grid2 = Grid(15, 15)
     grid.random_embryo_loc(3)
+    grid2.random_embryo_loc(3)
     print "Von Neuman"
     grid.von_neuman()
     grid.print_board()
+    print "Moore"
+    grid2.moore()
+    grid2.print_board()
