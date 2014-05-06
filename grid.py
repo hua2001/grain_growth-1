@@ -1,4 +1,6 @@
 # coding=utf-8
+import Tkinter
+
 __author__ = 'steman'
 from random import randint
 from cell import Cell
@@ -83,32 +85,32 @@ class Grid(object):
         """
         Von Neuman neighbourhood
         """
-        while(not self.full()):
-            for id in self.starting_embryos_location.keys():
-                new_embryos = list()
-                for cell in self.starting_embryos_location[id]:
-                    # Cell on the right
-                    if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id == -1:
-                        # Add new embryo
-                        new_embryos.append(Cell(cell.x+1, cell.y, True, cell.id))
-                    # Cell on the left
-                    if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id == -1:
-                        # Add new embryo
-                        new_embryos.append(Cell(cell.x-1, cell.y, True, cell.id))
-                    # Cell on the bottom
-                    if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id == -1:
-                        # Add new embryo
-                        new_embryos.append(Cell(cell.x, cell.y+1, True, cell.id))
-                    # Cell on the top
-                    if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id == -1:
-                        # Add new embryo
-                        new_embryos.append(Cell(cell.x, cell.y-1, True, cell.id))
-                del self.starting_embryos_location[id]
-                self.starting_embryos_location[id] = list()
-                self.starting_embryos_location[id].extend(new_embryos)
-                # Add new seeds
-                for cell in new_embryos:
-                    self.board[cell.y][cell.x] = cell
+        # while(not self.full()):
+        for id in self.starting_embryos_location.keys():
+            new_embryos = list()
+            for cell in self.starting_embryos_location[id]:
+                # Cell on the right
+                if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id == -1:
+                    # Add new embryo
+                    new_embryos.append(Cell(cell.x+1, cell.y, True, cell.id))
+                # Cell on the left
+                if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id == -1:
+                    # Add new embryo
+                    new_embryos.append(Cell(cell.x-1, cell.y, True, cell.id))
+                # Cell on the bottom
+                if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id == -1:
+                    # Add new embryo
+                    new_embryos.append(Cell(cell.x, cell.y+1, True, cell.id))
+                # Cell on the top
+                if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id == -1:
+                    # Add new embryo
+                    new_embryos.append(Cell(cell.x, cell.y-1, True, cell.id))
+            del self.starting_embryos_location[id]
+            self.starting_embryos_location[id] = list()
+            self.starting_embryos_location[id].extend(new_embryos)
+            # Add new seeds
+            for cell in new_embryos:
+                self.board[cell.y][cell.x] = cell
 
 
     def hexagonal_left(self):
@@ -182,15 +184,47 @@ class Grid(object):
         """
         pass
 
+root = Tkinter.Tk()
+r, c = 20, 20
+cells = [[0 for x in range(c)] for y in range(r)]
+
+
+def update(grid):
+    grid.von_neuman()
+    for i in range(grid.rows):
+        for j in range(grid.cols):
+            color = 'white'
+            if grid.board[i][j].id == 0:
+                color = 'red'
+            elif grid.board[i][j].id == 1:
+                color = 'blue'
+            elif grid.board[i][j].id == 2:
+                color = "green"
+            cells[i][j].configure(background=color)
+    root.after(125, update, grid)
 
 if __name__ == '__main__':
-    grid = Grid(15, 15)
-    grid2 = Grid(15, 15)
+    grid = Grid(r, c)
+    # grid2 = Grid(15, 15)
     grid.random_embryo_loc(3)
-    grid2.random_embryo_loc(3)
-    print "Von Neuman"
-    grid.von_neuman()
-    grid.print_board()
-    print "Moore"
-    grid2.moore()
-    grid2.print_board()
+    # grid2.random_embryo_loc(3)
+    # print "Von Neuman"
+    # grid.von_neuman()
+    for i in range(grid.rows):
+        for j in range(grid.cols):
+            color = 'white'
+            if grid.board[i][j].id == 0:
+                color = 'red'
+            elif grid.board[i][j].id == 1:
+                color = 'blue'
+            elif grid.board[i][j].id == 2:
+                color = "green"
+            cells[i][j] = Tkinter.Canvas(root, background=color, width=10, height=10, borderwidth=0)
+            cells[i][j].grid(row=i, column=j)
+    update(grid)
+    root.mainloop()
+
+    # grid.print_board()
+    # print "Moore"
+    # grid2.moore()
+    # grid2.print_board()
