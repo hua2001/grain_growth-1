@@ -93,7 +93,6 @@ class Grid(object):
 					# Add new embryo
 					new_embryos.append(Cell(cell.x, cell.y - 1, True, cell.id))
 					self.board[cell.y - 1][cell.x].alive = True
-				# print 'top'
 			del self.starting_embryos_location[id]
 			self.starting_embryos_location[id] = list()
 			self.starting_embryos_location[id].extend(new_embryos)
@@ -145,31 +144,207 @@ class Grid(object):
 		"""
 		Left hexagonal neighbourood
 		"""
-		pass
+		for id in self.starting_embryos_location.keys():
+			new_embryos = list()
+			for cell in self.starting_embryos_location[id]:
+				# Cell on the top left
+				if cell.x - 1 >= 0 and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x - 1].id == -1 \
+						and not self.board[cell.y - 1][cell.x - 1].alive:
+					new_embryos.append(Cell(cell.x - 1, cell.y - 1, True, cell.id))
+					self.board[cell.y - 1][cell.x - 1].alive = True
+				# Cell on the left
+				if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id == -1 \
+						and not self.board[cell.y][cell.x - 1].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x - 1, cell.y, True, cell.id))
+					self.board[cell.y][cell.x - 1].alive = True
+				# Cell on the top
+				if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id == -1 \
+						and not self.board[cell.y - 1][cell.x].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x, cell.y - 1, True, cell.id))
+					self.board[cell.y - 1][cell.x].alive = True
+				# Cell on the right
+				if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id == -1 \
+						and not self.board[cell.y][cell.x + 1].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x + 1, cell.y, True, cell.id))
+					self.board[cell.y][cell.x + 1].alive = True
+				# Cell on the bottom
+				if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id == -1 \
+						and not self.board[cell.y + 1][cell.x].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x, cell.y + 1, True, cell.id))
+					self.board[cell.y + 1][cell.x].alive = True
+				# Cell on the bottom right
+				if cell.x + 1 < self.cols and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x + 1].id == -1 \
+						and not self.board[cell.y + 1][cell.x + 1].alive:
+					new_embryos.append(Cell(cell.x + 1, cell.y + 1, True, cell.id))
+					self.board[cell.y + 1][cell.x + 1].alive = True
+			del self.starting_embryos_location[id]
+			self.starting_embryos_location[id] = list()
+			self.starting_embryos_location[id].extend(new_embryos)
+			for cell in new_embryos:
+				self.board[cell.y][cell.x] = cell
+			new_embryos = list()
 
 	def hexagonal_right(self):
 		"""
 		Right hexagonal neighbourood
 		"""
-		pass
+		for id in self.starting_embryos_location.keys():
+			new_embryos = list()
+			for cell in self.starting_embryos_location[id]:
+				# Cell on the top right
+				if cell.x + 1 < self.cols and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x + 1].id == -1 \
+						and not self.board[cell.y - 1][cell.x + 1].alive:
+					new_embryos.append(Cell(cell.x + 1, cell.y - 1, True, cell.id))
+					self.board[cell.y - 1][cell.x + 1].alive = True
+				# Cell on the bottom left
+				if cell.x - 1 >= 0 and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x - 1].id == -1 \
+						and not self.board[cell.y + 1][cell.x - 1].alive:
+					new_embryos.append(Cell(cell.x - 1, cell.y + 1, True, cell.id))
+					self.board[cell.y + 1][cell.x - 1].alive = True
+				# Cell on the right
+				if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id == -1 \
+						and not self.board[cell.y][cell.x + 1].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x + 1, cell.y, True, cell.id))
+					self.board[cell.y][cell.x + 1].alive = True
+				# Cell on the left
+				if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id == -1 \
+						and not self.board[cell.y][cell.x - 1].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x - 1, cell.y, True, cell.id))
+					self.board[cell.y][cell.x - 1].alive = True
+				# Cell on the bottom
+				if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id == -1 \
+						and not self.board[cell.y + 1][cell.x].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x, cell.y + 1, True, cell.id))
+					self.board[cell.y + 1][cell.x].alive = True
+				# Cell on the top
+				if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id == -1 \
+						and not self.board[cell.y - 1][cell.x].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x, cell.y - 1, True, cell.id))
+					self.board[cell.y - 1][cell.x].alive = True
+			del self.starting_embryos_location[id]
+			self.starting_embryos_location[id] = list()
+			self.starting_embryos_location[id].extend(new_embryos)
+			for cell in new_embryos:
+				self.board[cell.y][cell.x] = cell
+			new_embryos = list()
 
 	def hexagonal_random(self):
 		"""
-		Random hexagonal neighbourood
+		Random hexagonal neighbourhood
 		"""
-		pass
+		rand_num = randint(0, 10)
+		if rand_num % 2:
+			self.hexagonal_left()
+		else:
+			self.hexagonal_right()
+
+	def pentagonal_left(self):
+		"""
+		Pentagonal left neighbourhood
+		"""
+		for id in self.starting_embryos_location.keys():
+			new_embryos = list()
+			for cell in self.starting_embryos_location[id]:
+				# Cell on the top left
+				if cell.x - 1 >= 0 and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x - 1].id == -1 \
+						and not self.board[cell.y - 1][cell.x - 1].alive:
+					new_embryos.append(Cell(cell.x - 1, cell.y - 1, True, cell.id))
+					self.board[cell.y - 1][cell.x - 1].alive = True
+				# Cell on the left
+				if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id == -1 \
+						and not self.board[cell.y][cell.x - 1].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x - 1, cell.y, True, cell.id))
+					self.board[cell.y][cell.x - 1].alive = True
+				# Cell on the top
+				if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id == -1 \
+						and not self.board[cell.y - 1][cell.x].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x, cell.y - 1, True, cell.id))
+					self.board[cell.y - 1][cell.x].alive = True
+				# Cell on the bottom left
+				if cell.x - 1 >= 0 and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x - 1].id == -1 \
+						and not self.board[cell.y + 1][cell.x - 1].alive:
+					new_embryos.append(Cell(cell.x - 1, cell.y + 1, True, cell.id))
+					self.board[cell.y + 1][cell.x - 1].alive = True
+				# Cell on the bottom
+				if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id == -1 \
+						and not self.board[cell.y + 1][cell.x].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x, cell.y + 1, True, cell.id))
+					self.board[cell.y + 1][cell.x].alive = True
+			del self.starting_embryos_location[id]
+			self.starting_embryos_location[id] = list()
+			self.starting_embryos_location[id].extend(new_embryos)
+			for cell in new_embryos:
+				self.board[cell.y][cell.x] = cell
+			new_embryos = list()
+
+	def pentagonal_right(self):
+		"""
+		Pentagonal left neighbourhood
+		"""
+		for id in self.starting_embryos_location.keys():
+			new_embryos = list()
+			for cell in self.starting_embryos_location[id]:
+				# Cell on the top right
+				if cell.x + 1 < self.cols and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x + 1].id == -1 \
+						and not self.board[cell.y - 1][cell.x + 1].alive:
+					new_embryos.append(Cell(cell.x + 1, cell.y - 1, True, cell.id))
+					self.board[cell.y - 1][cell.x + 1].alive = True
+				# Cell on the top
+				if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id == -1 \
+						and not self.board[cell.y - 1][cell.x].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x, cell.y - 1, True, cell.id))
+					self.board[cell.y - 1][cell.x].alive = True
+				# Cell on the right
+				if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id == -1 \
+						and not self.board[cell.y][cell.x + 1].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x + 1, cell.y, True, cell.id))
+					self.board[cell.y][cell.x + 1].alive = True
+				# Cell on the bottom right
+				if cell.x + 1 < self.cols and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x + 1].id == -1 \
+						and not self.board[cell.y + 1][cell.x + 1].alive:
+					new_embryos.append(Cell(cell.x + 1, cell.y + 1, True, cell.id))
+					self.board[cell.y + 1][cell.x + 1].alive = True
+				# Cell on the bottom
+				if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id == -1 \
+						and not self.board[cell.y + 1][cell.x].alive:
+					# Add new embryo
+					new_embryos.append(Cell(cell.x, cell.y + 1, True, cell.id))
+					self.board[cell.y + 1][cell.x].alive = True
+			del self.starting_embryos_location[id]
+			self.starting_embryos_location[id] = list()
+			self.starting_embryos_location[id].extend(new_embryos)
+			for cell in new_embryos:
+				self.board[cell.y][cell.x] = cell
+			new_embryos = list()
 
 	def pentagonal_random(self):
 		"""
 		Random pentagonal neighbourood
 		"""
-		pass
+		rand_num = randint(0, 10)
+		if rand_num % 2:
+			self.pentagonal_left()
+		else:
+			self.pentagonal_right()
 
 	def random_embryo_loc(self, quantity):
 		"""
 		Set random location of @quantity embryons
 		"""
-		print "Random embyos:"
+		print "Random embryos:"
 		for i in range(quantity):
 			random_row = randint(0, self.rows - 1)
 			random_col = randint(0, self.cols - 1)
@@ -182,11 +357,19 @@ class Grid(object):
 			print "row[{}] col[{}] x={}, y={}".format(random_row, random_col, self.board[random_row][random_col].x,
 													  self.board[random_row][random_col].y)
 
-	def linear_embryo_loc(self, quantity, offset):
+	def linear_embryo_loc(self, offset):
 		"""
-		Set location of @quantity embryons with given offset
+		Set location of embryons with given offset
 		"""
-		pass
+		for i in range(self.rows):
+			for j in range(0, self.cols, offset):
+				self.board[i][j].alive = True
+				self.board[i][j].id = i + j
+				self.board[i][j].x = j
+				self.board[i][j].y = i
+				self.starting_embryos_location[i + j] = list()
+				self.starting_embryos_location[i + j].append(self.board[i][j])
+				print "Added cell: {}".format(self.board[i][j])
 
 	def radius_embryo_loc(self, quantity, radius):
 		"""
@@ -248,19 +431,15 @@ def update(grid):
 			elif grid.board[cell.y][cell.x].id == 4:
 				color = "pink"
 			cells[cell.y][cell.x].configure(background=color)
-	grid.moore()
-	root.after(50, update, grid)
+	grid.pentagonal_random()
+	root.after(100, update, grid)
 
 
 if __name__ == '__main__':
 	grid = Grid(r, c)
-	grid.random_embryo_loc(3)
+	# grid.random_embryo_loc(3)
+	grid.linear_embryo_loc(15)
 	# grid.mouse_embyro_loc()
-	# grid.von_neuman()
-	# grid.print_board()
-	# print 'startowa pozycja ziaren'
-	# for key in grid.starting_embryos_location.keys():
-	#         print key, value
 	for i in range(grid.rows):
 		for j in range(grid.cols):
 			color = 'white'
@@ -278,8 +457,3 @@ if __name__ == '__main__':
 			cells[i][j].grid(row=i, column=j)
 	update(grid)
 	root.mainloop()
-
-# grid.print_board()
-# print "Moore"
-# grid2.moore()
-# grid2.print_board()
