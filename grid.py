@@ -343,27 +343,49 @@ class Grid(object):
         """
 		Set location of embryons with given offset
 		"""
+        k = 0
         for i in range(self.rows):
             for j in range(0, self.cols, offset):
                 self.board[i][j].alive = True
-                self.board[i][j].id = i + j
+                self.board[i][j].id = k
                 self.board[i][j].x = j
                 self.board[i][j].y = i
-                self.starting_embryos_location[i + j] = list()
-                self.starting_embryos_location[i + j].append(self.board[i][j])
+                self.starting_embryos_location[k] = list()
+                self.starting_embryos_location[k].append(self.board[i][j])
                 print "Added cell: {}".format(self.board[i][j])
+                k += 1
 
-    def radius_embryo_loc(self, quantity, radius):
+    def radius_embryo_loc(self, radius):
         """
 		Set location of @quantity embryons with given radius
 		"""
-        pass
+        k = 0
+        for i in range(0, self.rows, radius):
+            for j in range(0, self.cols, radius):
+                self.board[i][j].alive = True
+                self.board[i][j].id = k
+                self.board[i][j].x = j
+                self.board[i][j].y = i
+                self.starting_embryos_location[k] = list()
+                self.starting_embryos_location[k].append(self.board[i][j])
+                print "Added cell: {}".format(self.board[i][j])
+                k += 1
 
-    def mouse_embyro_loc(self):
+    def mouse_embyro_loc(self, points):
         """
 		Set location of @quantity embryons with mouse clicks
 		"""
-        pass
+        for nr, (x, y) in enumerate(points):
+            row = x
+            col = y
+            print row, col
+            self.board[row][col].alive = True
+            self.board[row][col].id = nr
+            self.board[row][col].x = col
+            self.board[row][col].y = row
+            self.starting_embryos_location[nr] = list()
+            self.starting_embryos_location[nr].append(self.board[row][col])
+            print "Added cell: {}".format(self.board[row][col])
 
     def periodic_bc(self):
         """

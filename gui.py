@@ -15,13 +15,16 @@ class Foo(QtGui.QWidget):
         self.scene = QtGui.QGraphicsScene()
         self.view = QtGui.QGraphicsView(self.scene)
         self.grid = None
+        self.mouse_cords = list()
         self.box_layout = QtGui.QVBoxLayout()
-        self.grid_button = QtGui.QPushButton('Start simulation')
+        self.simulation_button = QtGui.QPushButton('Start simulation')
+
         self.rule_combo = QtGui.QComboBox()
         self.location_combo = QtGui.QComboBox()
         self.embryos_spin_box = QtGui.QSpinBox()
         self.rows_spin_box = QtGui.QSpinBox()
         self.cols_spin_box = QtGui.QSpinBox()
+
         self.embryos_label = QtGui.QLabel('Number of starting embryons')
         self.rows_label = QtGui.QLabel('Number of rows')
         self.cols_label = QtGui.QLabel('Number of collumns')
@@ -33,38 +36,73 @@ class Foo(QtGui.QWidget):
 
         self.init_layout()
 
-        self.grid_button.clicked.connect(self.simulation)
+        self.simulation_button.clicked.connect(self.simulation)
+
 
     def init_combo_boxes(self):
         rules = ['Moore', 'Von Neumann', 'Hexagonal left', 'Hexagonal right', 'Random hexagonal', 'Random pentagonal']
         locations = ['Random loc.', 'Linear loc.', 'Radius loc.', 'Point & click']
         self.rule_combo.addItems(rules)
         self.location_combo.addItems(locations)
+        self.location_combo.currentIndexChanged.connect(self.update_label)
+
 
     def init_spin_boxes(self):
-        self.rows_spin_box.setMaximum(999)
+        self.rows_spin_box.setMaximum(1331)
         self.cols_spin_box.setMaximum(999)
         self.embryos_spin_box.setMaximum(255)
+
+
 
     def init_layout(self):
         self.box_layout.addWidget(self.view)
         self.hbox_layout = QtGui.QHBoxLayout()
-        self.hbox_layout.addWidget(self.grid_button)
+        self.hbox_layout.addWidget(self.simulation_button)
         self.hbox_layout.addWidget(self.rule_combo)
         self.hbox_layout.addWidget(self.location_combo)
-        self.hbox_layout.addWidget(self.bc_checkbox)
         self.hbox_layout.addWidget(self.embryos_label)
         self.hbox_layout.addWidget(self.embryos_spin_box)
         self.hbox_layout.addWidget(self.rows_label)
         self.hbox_layout.addWidget(self.rows_spin_box)
         self.hbox_layout.addWidget(self.cols_label)
         self.hbox_layout.addWidget(self.cols_spin_box)
+        self.hbox_layout.addWidget(self.bc_checkbox)
         self.box_layout.addLayout(self.hbox_layout)
         self.setLayout(self.box_layout)
 
+
+    def mousePressEvent(self, QMouseEvent):
+        mouse_pos =  QMouseEvent.pos()
+        if self.location_combo.currentIndex() == 3 and \
+            (0, 0) <= (mouse_pos.x(), mouse_pos.y()) < (self.view.frameSize().width(), self.view.frameSize().height()):
+            self.mouse_cords.append((mouse_pos.x(), mouse_pos.y()))
+            print (mouse_pos.x(), mouse_pos.y())
+
+
+    def update_label(self):
+        # Not so pretty but it works
+        if self.location_combo.currentIndex() == 1:
+            self.embryos_label.setDisabled(False)
+            self.embryos_spin_box.setDisabled(False)
+            self.embryos_label.setText('Offset')
+        elif self.location_combo.currentIndex() == 3:
+            self.rows_spin_box.valueChanged.connect(self.update_view_size)
+            self.cols_spin_box.valueChanged.connect(self.update_view_size)
+            self.embryos_label.setDisabled(True)
+            self.embryos_spin_box.setDisabled(True)
+        else:
+            self.embryos_label.setDisabled(False)
+            self.embryos_spin_box.setDisabled(False)
+            self.embryos_label.setText('Number of starting embryons')
+
+    def update_view_size(self):
+        self.view.resize(self.rows_spin_box.value(), self.cols_spin_box.value())
+
     def simulation(self):
+        print self.mouse_cords
         num_of_rows = self.rows_spin_box.value()
         num_of_cols = self.cols_spin_box.value()
+        # self.view.resize(num_of_rows, num_of_cols)
 
         self.grid = Grid(num_of_rows, num_of_cols)
         num_of_embryos = self.embryos_spin_box.value()
@@ -72,11 +110,12 @@ class Foo(QtGui.QWidget):
         if self.location_combo.currentIndex() == 0:
             self.grid.random_embryo_loc(num_of_embryos)
         elif self.location_combo.currentIndex() == 1:
-            self.grid.linear_embryo_loc()
+            self.grid.linear_embryo_loc(num_of_embryos)
         elif self.location_combo.currentIndex() == 2:
-            self.grid.radius_embryo_loc()
+            self.grid.radius_embryo_loc(num_of_embryos)
         else:
-            self.grid.mouse_embyro_loc()
+            self.grid.mouse_embyro_loc(self.mouse_cords)
+            self.mouse_cords = list()
 
         if self.bc_checkbox.isChecked():
             self.grid.periodic_bc()
@@ -95,16 +134,16 @@ class Foo(QtGui.QWidget):
             else:
                 self.grid.hexagonal_random()
         self.create_grains_img()
-        self.display_grains()
+        self.display_grains_img()
 
-    def display_grains(self):
+    def display_grains_img(self):
         self.scene.clear()
         img = Image.open('grains.png')
         width, height = img.size
         self.imgQ = ImageQt.ImageQt(img)
         pixMap = QtGui.QPixmap.fromImage(self.imgQ)
         self.scene.addPixmap(pixMap)
-        self.view.fitInView(QtCore.QRectF(0, 0, width, height), QtCore.Qt.KeepAspectRatio)
+        self.view.fitInView(QtCore.QRectF(0, 0, width, height))#, QtCore.Qt.KeepAspectRatio)
         self.scene.update()
 
     def create_grains_img(self):
