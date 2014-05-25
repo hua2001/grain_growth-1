@@ -10,6 +10,3 @@ class Cell(object):
 
     def __str__(self):
         return 'Cell id:{} alive:{} x:{} y:{}'.format(self.id, self.alive, self.x, self.y)
-
-	def __cmp__(self, other):
-		return self.x == other.x and self.y == other.y and self.id == other.id and self.alive == other.alive
