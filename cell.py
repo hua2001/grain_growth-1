@@ -7,6 +7,11 @@ class Cell(object):
         self.id = id
         self.x = x
         self.y = y
+        self.dislocations_quantity = 0
+        self.recrystallized = 0
 
     def __str__(self):
         return 'Cell id:{} alive:{} x:{} y:{}'.format(self.id, self.alive, self.x, self.y)
+
+    def __gt__(self, other):
+        return self.id > other.id

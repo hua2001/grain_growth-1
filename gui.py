@@ -1,9 +1,13 @@
+# coding=utf-8
 import os
 import random
 import sys
 import ImageQt
 import datetime
 import numpy as np
+# from threading import Thread
+# import matplotlib.pyplot as plt
+import time
 from PyQt4 import QtCore, QtGui
 from images2gif import writeGif
 from PIL import Image
@@ -24,6 +28,8 @@ class SimulationGUI(QtGui.QWidget):
         self.simulation_button = QtGui.QPushButton('Start simulation')
         self.gif_button = QtGui.QPushButton('Load grain growth animation')
         self.gif_button.setDisabled(True)
+        self.recrystallized_button = QtGui.QPushButton('Show recrystallization result')
+        self.recrystallized_button.setDisabled(True)
 
         self.rule_combo = QtGui.QComboBox()
         self.location_combo = QtGui.QComboBox()
@@ -43,6 +49,7 @@ class SimulationGUI(QtGui.QWidget):
 
         self.simulation_button.clicked.connect(self.simulation)
         self.gif_button.clicked.connect(self.show_gif_animation)
+        self.recrystallized_button.clicked.connect(self.display_recrystallized_img)
 
     def init_combo_boxes(self):
         rules = ['Moore', 'Von Neumann', 'Hexagonal left', 'Hexagonal right', 'Random hexagonal', 'Random pentagonal']
@@ -61,6 +68,7 @@ class SimulationGUI(QtGui.QWidget):
         self.vbox_layout = QtGui.QVBoxLayout()
         self.vbox_layout.addWidget(self.simulation_button)
         self.vbox_layout.addWidget(self.gif_button)
+        self.vbox_layout.addWidget(self.recrystallized_button)
         self.vbox_layout.addWidget(self.rule_combo)
         self.vbox_layout.addWidget(self.location_combo)
         self.vbox_layout.addWidget(self.embryos_label)
@@ -86,6 +94,10 @@ class SimulationGUI(QtGui.QWidget):
             self.embryos_label.setDisabled(False)
             self.embryos_spin_box.setDisabled(False)
             self.embryos_label.setText('Offset')
+        elif self.location_combo.currentIndex() == 2:
+            self.embryos_label.setDisabled(False)
+            self.embryos_spin_box.setDisabled(False)
+            self.embryos_label.setText('Radius')
         elif self.location_combo.currentIndex() == 3:
             self.scene.clear()
             self.view.resize(0, 0)
@@ -146,8 +158,12 @@ class SimulationGUI(QtGui.QWidget):
             self.iteration_counter += 1
         self.create_grains_img()
         self.display_grains_img()
+        self.grid.find_edged_grains()
+        # for cell in self.grid.edged_grains:
+        #     print cell
         print self.iteration_counter
         self.gif_button.setDisabled(False)
+        self.recrystallized_button.setDisabled(False)
 
     def display_grains_img(self):
         """
@@ -162,11 +178,25 @@ class SimulationGUI(QtGui.QWidget):
         self.view.fitInView(QtCore.QRectF(0, 0, width, height))#    , QtCore.Qt.KeepAspectRatio)
         self.scene.update()
 
+    def display_recrystallized_img(self):
+        """
+        Simply displays final form of grain growth process in main window.
+        """
+        self.scene.clear()
+        img = Image.open('grains2.png')
+        width, height = img.size
+        self.imgQ = ImageQt.ImageQt(img)
+        pixMap = QtGui.QPixmap.fromImage(self.imgQ)
+        self.scene.addPixmap(pixMap)
+        self.view.fitInView(QtCore.QRectF(0, 0, width, height))#    , QtCore.Qt.KeepAspectRatio)
+        self.scene.update()
+
     def _create_grains_img(self, counter):
         """
         Create .png file from numpy array which will be used to
         generate gif animation showing grain growth over time.
         """
+        self.animated_grid.find_edged_grains()
         img_array = np.zeros((self.animated_grid.rows, self.animated_grid.cols, 3), dtype=np.uint8)
         for i in range(self.animated_grid.rows):
             for j in range(self.animated_grid.cols):
@@ -222,6 +252,22 @@ class SimulationGUI(QtGui.QWidget):
                 img_array[i, j] = self.RGB_dict[self.grid.board[i][j].id]
         img = Image.fromarray(img_array, 'RGB')
         img.save('grains.png')
+
+        self.grid.find_edged_grains()
+        print 'ilosc krawedziowych', len(self.grid.edged_grains)
+        while(self.grid.time <= 1):
+            self.grid.assign_dyslocations()
+            for i in range(self.grid.rows):
+                for j in range(self.grid.cols):
+                    if self.grid.critical_dyslocation_density <= self.grid.board[i][j].dislocations_quantity:
+                        self.grid.transition_rule(self.grid.board[i][j])
+                        try:
+                            self.RGB_dict[self.grid.board[i][j].id]
+                        except:
+                            self.RGB_dict[self.grid.board[i][j].id] = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
+                        img_array[self.grid.board[i][j].y, self.grid.board[i][j].x] = self.RGB_dict[self.grid.board[i][j].id]
+        img = Image.fromarray(img_array, 'RGB')
+        img.save('grains2.png')
 
     def generate_RGB_dict(self):
         """
