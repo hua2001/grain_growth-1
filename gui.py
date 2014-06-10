@@ -30,6 +30,8 @@ class SimulationGUI(QtGui.QWidget):
         self.gif_button.setDisabled(True)
         self.recrystallized_button = QtGui.QPushButton('Show recrystallization result')
         self.recrystallized_button.setDisabled(True)
+        self.monte_carlo_button = QtGui.QPushButton('Monte Carlo method')
+        self.result_button = QtGui.QPushButton('Monte')
 
         self.rule_combo = QtGui.QComboBox()
         self.location_combo = QtGui.QComboBox()
@@ -50,6 +52,8 @@ class SimulationGUI(QtGui.QWidget):
         self.simulation_button.clicked.connect(self.simulation)
         self.gif_button.clicked.connect(self.show_gif_animation)
         self.recrystallized_button.clicked.connect(self.display_recrystallized_img)
+        self.monte_carlo_button.clicked.connect(self.monte_carlo_method)
+        self.result_button.clicked.connect(self.display_monte_img)
 
     def init_combo_boxes(self):
         rules = ['Moore', 'Von Neumann', 'Hexagonal left', 'Hexagonal right', 'Random hexagonal', 'Random pentagonal']
@@ -69,6 +73,8 @@ class SimulationGUI(QtGui.QWidget):
         self.vbox_layout.addWidget(self.simulation_button)
         self.vbox_layout.addWidget(self.gif_button)
         self.vbox_layout.addWidget(self.recrystallized_button)
+        self.vbox_layout.addWidget(self.monte_carlo_button)
+        self.vbox_layout.addWidget(self.result_button)
         self.vbox_layout.addWidget(self.rule_combo)
         self.vbox_layout.addWidget(self.location_combo)
         self.vbox_layout.addWidget(self.embryos_label)
@@ -158,12 +164,44 @@ class SimulationGUI(QtGui.QWidget):
             self.iteration_counter += 1
         self.create_grains_img()
         self.display_grains_img()
-        self.grid.find_edged_grains()
-        # for cell in self.grid.edged_grains:
-        #     print cell
-        print self.iteration_counter
+        # print self.iteration_counter
         self.gif_button.setDisabled(False)
         self.recrystallized_button.setDisabled(False)
+
+    def monte_carlo_method(self):
+        num_of_rows = self.rows_spin_box.value()
+        num_of_cols = self.cols_spin_box.value()
+
+        self.grid = Grid(num_of_rows, num_of_cols)
+
+        self.grid.shuffle_grid()
+        self.RGB_dict = self.generate_RGB_dict()
+        self.create_grains_img()
+        self.display_grains_img()
+
+        for i in xrange(400):
+            print 'Iteration:', i
+            self.grid.monte_carlo()
+
+        img_array = np.zeros((self.grid.rows, self.grid.cols, 3), dtype=np.uint8)
+        for i in range(self.grid.rows):
+            for j in range(self.grid.cols):
+                img_array[i, j] = self.RGB_dict[self.grid.board[i][j].id]
+        img = Image.fromarray(img_array, 'RGB')
+        img.save('grains3.png')
+
+    def display_monte_img(self):
+        """
+        Simply displays final form of grain growth process in main window.
+        """
+        self.scene.clear()
+        img = Image.open('grains3.png')
+        width, height = img.size
+        self.imgQ = ImageQt.ImageQt(img)
+        pixMap = QtGui.QPixmap.fromImage(self.imgQ)
+        self.scene.addPixmap(pixMap)
+        self.view.fitInView(QtCore.QRectF(0, 0, width, height))#    , QtCore.Qt.KeepAspectRatio)
+        self.scene.update()
 
     def display_grains_img(self):
         """
@@ -238,7 +276,7 @@ class SimulationGUI(QtGui.QWidget):
             else:
                 self.animated_grid.hexagonal_random(enable_bc)
             counter += 1
-        print counter
+        # print counter
         # don't forget about final gif frame
         self._create_grains_img(counter+1)
 
@@ -253,21 +291,55 @@ class SimulationGUI(QtGui.QWidget):
         img = Image.fromarray(img_array, 'RGB')
         img.save('grains.png')
 
-        self.grid.find_edged_grains()
-        print 'ilosc krawedziowych', len(self.grid.edged_grains)
-        while(self.grid.time <= 1):
-            self.grid.assign_dyslocations()
-            for i in range(self.grid.rows):
-                for j in range(self.grid.cols):
-                    if self.grid.critical_dyslocation_density <= self.grid.board[i][j].dislocations_quantity:
-                        self.grid.transition_rule(self.grid.board[i][j])
-                        try:
-                            self.RGB_dict[self.grid.board[i][j].id]
-                        except:
-                            self.RGB_dict[self.grid.board[i][j].id] = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
-                        img_array[self.grid.board[i][j].y, self.grid.board[i][j].x] = self.RGB_dict[self.grid.board[i][j].id]
-        img = Image.fromarray(img_array, 'RGB')
-        img.save('grains2.png')
+        # self.grid.find_edged_grains()
+        # for i in range(self.grid.rows):
+        #     for j in range(self.grid.cols):
+        #         if not self.grid.board[i][j] in self.grid.edged_grains:
+        #             self.grid.board[i][j].alive = False
+        #             # self.grid.board[i][j].id = -1
+        #         # else:
+        #         #     if self.grid.board[i][j].id in self.grid.starting_embryos_location.keys():
+        #         #         self.grid.starting_embryos_location[self.grid.board[i][j].id].extend([self.grid.board[i][j]])
+        #         #     else:
+        #         #         self.grid.starting_embryos_location[self.grid.board[i][j].id] = list()
+        #         #         self.grid.starting_embryos_location[self.grid.board[i][j].id].extend([self.grid.board[i][j]])
+        #
+        # # for id in self.grid.starting_embryos_location.keys():
+        # #     for cell in self.grid.starting_embryos_location[id]:
+        # #         print 'nowe', cell
+        #
+        # print 'ilosc krawedziowych', len(self.grid.edged_grains)
+        # tmp = img_array
+        # # self.grid.von_neuman2()
+        # while(self.grid.time <= 0.1):
+        #     self.grid.assign_dyslocations()
+        #     for i in range(self.grid.rows):
+        #         for j in range(self.grid.cols):
+        #             if self.grid.critical_dyslocation_density <= self.grid.board[i][j].dislocations_quantity:
+        #                 self.grid.transition_rule(self.grid.board[i][j])
+        #                 # raw_input("enter...")
+        #                 try:
+        #                     self.RGB_dict[self.grid.board[i][j].id]
+        #                 except:
+        #                     self.RGB_dict[self.grid.board[i][j].id] = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
+        #                 # img_array[self.grid.board[i][j].y, self.grid.board[i][j].x] = self.RGB_dict[self.grid.board[i][j].id]
+        #
+        #                 # if self.grid.board[i][j].id in self.grid.starting_embryos_location.keys():
+        #                 #     self.grid.starting_embryos_location[self.grid.board[i][j].id].extend([self.grid.board[i][j]])
+        #                 # else:
+        #                 #     self.grid.starting_embryos_location[self.grid.board[i][j].id] = list()
+        #                 #     self.grid.starting_embryos_location[self.grid.board[i][j].id].extend([self.grid.board[i][j]])
+        #             #     print
+        #             # if self.grid.board[i][j].recrystallized:
+        #             self.grid.von_neuman2(self.grid.board[i][j])
+        #             # raw_input("won..")
+        #             # img = Image.fromarray(img_array, 'RGB')
+        #             # img.save('/home/steman/dupa/grains{}{}.png'.format(i, j))
+        # for i in range(self.grid.rows):
+        #     for j in range(self.grid.cols):
+        #         img_array[i, j] = self.RGB_dict[self.grid.board[i][j].id]
+        # img = Image.fromarray(img_array, 'RGB')
+        # img.save('grains2.png')
 
     def generate_RGB_dict(self):
         """

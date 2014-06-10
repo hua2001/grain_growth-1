@@ -4,7 +4,7 @@ import time
 
 __author__ = 'steman'
 import Tkinter
-from random import randint, random
+from random import randint, random, shuffle
 from math import sqrt, pow
 from cell import Cell
 
@@ -34,6 +34,13 @@ class Grid(object):
         for i in range(self.rows):
             for j in range(self.cols):
                 if self.board[i][j].id == -1:
+                    return False
+        return True
+
+    def all_visited(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if not self.board[i][j].visited:
                     return False
         return True
 
@@ -111,37 +118,37 @@ class Grid(object):
 
     def transition_rule(self, cell):
         # Cell on the top left
-        if cell.x - 1 >= 0 and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x - 1].recrystallized:
-            print 'Lewy top'
-            cell.recrystallized = 1
-            cell.id = self.board[cell.y - 1][cell.x - 1].id
-            cell.dislocations_quantity = self.ro
-            if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
-                print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
-        # Cell on the top right
-        elif cell.x + 1 < self.cols and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x + 1].recrystallized:
-            print 'prawy top'
-            cell.recrystallized = 1
-            cell.id = self.board[cell.y - 1][cell.x + 1].id
-            cell.dislocations_quantity = self.ro
-            if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
-                print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
-        # Cell on the bottom left
-        elif cell.x - 1 >= 0 and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x - 1].recrystallized:
-            print 'lewy bot'
-            cell.recrystallized = 1
-            cell.id = self.board[cell.y + 1][cell.x - 1].id
-            cell.dislocations_quantity = self.ro
-            if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
-                print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
-        # Cell on the bottom right
-        elif cell.x + 1 < self.cols and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x + 1].recrystallized:
-            print 'prawy bot'
-            cell.recrystallized = 1
-            cell.id = self.board[cell.y + 1][cell.x + 1].id
-            cell.dislocations_quantity = self.ro
-            if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
-                print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
+        # if cell.x - 1 >= 0 and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x - 1].recrystallized:
+        #     print 'Lewy top'
+        #     cell.recrystallized = 1
+        #     cell.id = self.board[cell.y - 1][cell.x - 1].id
+        #     cell.dislocations_quantity = self.ro
+        #     if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
+        #         print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
+        # # Cell on the top right
+        # elif cell.x + 1 < self.cols and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x + 1].recrystallized:
+        #     print 'prawy top'
+        #     cell.recrystallized = 1
+        #     cell.id = self.board[cell.y - 1][cell.x + 1].id
+        #     cell.dislocations_quantity = self.ro
+        #     if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
+        #         print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
+        # # Cell on the bottom left
+        # elif cell.x - 1 >= 0 and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x - 1].recrystallized:
+        #     print 'lewy bot'
+        #     cell.recrystallized = 1
+        #     cell.id = self.board[cell.y + 1][cell.x - 1].id
+        #     cell.dislocations_quantity = self.ro
+        #     if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
+        #         print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
+        # # Cell on the bottom right
+        # elif cell.x + 1 < self.cols and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x + 1].recrystallized:
+        #     print 'prawy bot'
+        #     cell.recrystallized = 1
+        #     cell.id = self.board[cell.y + 1][cell.x + 1].id
+        #     cell.dislocations_quantity = self.ro
+        #     if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
+        #         print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
 
         # Cell on the right
         # print '{} <=> {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
@@ -150,6 +157,7 @@ class Grid(object):
             cell.id = self.board[cell.y][cell.x + 1].id
             cell.recrystallized = 1
             cell.dislocations_quantity = self.ro
+            self.new_grains.append(cell)
             # self.edged_grains.append(self.board[cell.y][cell.x + 1])
             if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
                 print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
@@ -159,6 +167,7 @@ class Grid(object):
             cell.id = self.board[cell.y][cell.x - 1].id
             cell.recrystallized = 1
             cell.dislocations_quantity = self.ro
+            self.new_grains.append(cell)
             # self.edged_grains.append(self.board[cell.y][cell.x - 1])
             if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
                 print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
@@ -168,6 +177,7 @@ class Grid(object):
             cell.id = self.board[cell.y + 1][cell.x].id
             cell.recrystallized = 1
             cell.dislocations_quantity = self.ro
+            self.new_grains.append(cell)
             # self.edged_grains.append(self.board[cell.y + 1][cell.x])
             if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
                 print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
@@ -177,6 +187,7 @@ class Grid(object):
             cell.id = self.board[cell.y - 1][cell.x].id
             cell.recrystallized = 1
             cell.dislocations_quantity = self.ro
+            self.new_grains.append(cell)
             # self.edged_grains.append(self.board[cell.y - 1][cell.x])
             if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
                 print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
@@ -184,53 +195,10 @@ class Grid(object):
             cell.recrystallized = 1
             cell.dislocations_quantity = self.ro
             cell.id = max(max(c[1:]) for c in self.board).id + 1
+            self.board[cell.y][cell.x].id = cell.id
+            self.new_grains.append(cell)
             print '===============>', cell.id
         # return self.edged_grains.pop(self.edged_grains.index(cell))
-
-    def transition_rule2(self, cell):
-        if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].recrystallized:
-            print 'prawa'
-            cell.id = self.board[cell.y][cell.x + 1].id
-            self.edged_grains.append(self.board[cell.y][cell.x + 1])
-            if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
-                print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
-                cell.recrystallized = 1
-
-                cell.dislocations_quantity = self.ro
-        # Cell on the left
-        elif cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].recrystallized:
-            print 'lewy'
-            cell.id = self.board[cell.y][cell.x - 1].id
-            self.edged_grains.append(self.board[cell.y][cell.x - 1])
-            if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
-                print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
-                cell.recrystallized = 1
-
-                cell.dislocations_quantity = self.ro
-        # Cell on the bottom
-        elif cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].recrystallized:
-            print 'bot'
-            cell.id = self.board[cell.y + 1][cell.x].id
-            if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
-                print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
-                cell.recrystallized = 1
-
-                cell.dislocations_quantity = self.ro
-        # Cell on the top
-        elif cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].recrystallized:
-            print 'top'
-            cell.id = self.board[cell.y - 1][cell.x].id
-            self.edged_grains.append(self.board[cell.y - 1][cell.x])
-            if cell.dislocations_quantity >= self.sum_up_dislocations(cell):
-                print '{} {}'.format(cell.dislocations_quantity, self.sum_up_dislocations(cell))
-                cell.recrystallized = 1
-
-                cell.dislocations_quantity = self.ro
-        else:
-            cell.recrystallized = 1
-            cell.dislocations_quantity = self.ro
-            cell.id = max(max(c[1:]) for c in self.board).id + 1
-            print '===============>', cell.id
 
     def assign_dyslocations(self):
         if self.time:
@@ -240,7 +208,6 @@ class Grid(object):
         self.time += 0.001
         tmp = ro
         ro = ro / (self.rows * self.cols)
-        # print 'ro ', ro, ' tmp', tmp
 
         for cell in self.edged_grains:
             cell.dislocations_quantity += edge_dislocation() * ro
@@ -257,14 +224,14 @@ class Grid(object):
             rand_row = randint(0, self.rows-1)
             rand_col = randint(0, self.cols-1)
             gift = tmp / (self.rows * self.cols)
-            # if self.board[rand_row][rand_col] in self.edged_grains:
-            #     cell.dislocations_quantity += gift
-            # else:
             self.board[rand_row][rand_col].dislocations_quantity += gift
             tmp -= self.board[rand_row][rand_col].dislocations_quantity
 
     def add_new_grains(self, id):
-        del self.starting_embryos_location[id]
+        try:
+            del self.starting_embryos_location[id]
+        except KeyError as ke:
+            print ke
         self.starting_embryos_location[id] = list()
         self.starting_embryos_location[id].extend(self.new_grains)
         for cell in self.new_grains:
@@ -334,30 +301,55 @@ class Grid(object):
                 # Cell on the right
                 if border_cond:
                     self.periodic_bc(cell)
-                if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id == -1 \
-                    and not self.board[cell.y][cell.x + 1].alive:
+                # if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id == -1 \
+                if cell.x + 1 < self.cols and not self.board[cell.y][cell.x + 1].alive:
                     new_cell = Cell(cell.x + 1, cell.y, True, cell.id)
                     self.new_grains.append(new_cell)
                     self.board[cell.y][cell.x + 1].alive = True
                 # Cell on the left
-                if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id == -1 \
-                    and not self.board[cell.y][cell.x - 1].alive:
+                if cell.x - 1 >= 0 and not self.board[cell.y][cell.x - 1].alive:
                     new_cell = Cell(cell.x - 1, cell.y, True, cell.id)
                     self.new_grains.append(new_cell)
                     self.board[cell.y][cell.x - 1].alive = True
                 # Cell on the bottom
-                if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id == -1 \
-                    and not self.board[cell.y + 1][cell.x].alive:
+                if cell.y + 1 < self.rows and not self.board[cell.y + 1][cell.x].alive:
                     new_cell = Cell(cell.x, cell.y + 1, True, cell.id)
                     self.new_grains.append(new_cell)
                     self.board[cell.y + 1][cell.x].alive = True
                 # Cell on the top
-                if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id == -1 \
-                    and not self.board[cell.y - 1][cell.x].alive:
+                if cell.y - 1 >= 0 and not self.board[cell.y - 1][cell.x].alive:
                     new_cell = Cell(cell.x, cell.y - 1, True, cell.id)
                     self.new_grains.append(new_cell)
                     self.board[cell.y - 1][cell.x].alive = True
             self.add_new_grains(id)
+
+    def von_neuman2(self, cell, border_cond=False):
+        """
+		Von Neuman neighbourhood
+		"""
+        # Cell on the right
+        if border_cond:
+            self.periodic_bc(cell)
+        if cell.x + 1 < self.cols and not self.board[cell.y][cell.x + 1].alive:
+            new_cell = Cell(cell.x + 1, cell.y, True, cell.id)
+            self.new_grains.append(new_cell)
+            self.board[cell.y][cell.x + 1].alive = True
+        # Cell on the left
+        if cell.x - 1 >= 0 and not self.board[cell.y][cell.x - 1].alive:
+            new_cell = Cell(cell.x - 1, cell.y, True, cell.id)
+            self.new_grains.append(new_cell)
+            self.board[cell.y][cell.x - 1].alive = True
+        # Cell on the bottom
+        if cell.y + 1 < self.rows and not self.board[cell.y + 1][cell.x].alive:
+            new_cell = Cell(cell.x, cell.y + 1, True, cell.id)
+            self.new_grains.append(new_cell)
+            self.board[cell.y + 1][cell.x].alive = True
+        # Cell on the top
+        if cell.y - 1 >= 0 and not self.board[cell.y - 1][cell.x].alive:
+            new_cell = Cell(cell.x, cell.y - 1, True, cell.id)
+            self.new_grains.append(new_cell)
+            self.board[cell.y - 1][cell.x].alive = True
+        self.add_new_grains(cell.id)
 
     def hexagonal_left(self, border_cond=False):
         """
@@ -637,6 +629,98 @@ class Grid(object):
             # Add new embryo
             self.new_grains.append(Cell(cell.x, self.rows - 1, True, cell.id))
             self.board[self.rows - 1][cell.x].alive = True
+
+    def shuffle_grid(self):
+        # losowo zageszczona siatka
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.board[i][j].id = randint(0, 50)
+
+    def cell_energy(self, cell):
+        energy = 0
+        # Cell on the top left
+        if cell.x - 1 >= 0 and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x - 1].id != cell.id:
+            energy += 1
+        # Cell on the top right
+        if cell.x + 1 < self.cols and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x + 1].id != cell.id:
+            energy += 1
+        # Cell on the bottom left
+        if cell.x - 1 >= 0 and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x - 1].id != cell.id:
+            energy += 1
+        # Cell on the bottom right
+        if cell.x + 1 < self.cols and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x + 1].id != cell.id:
+            energy += 1
+        # Cell on the right
+        if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id != cell.id:
+            energy += 1
+        # Cell on the left
+        if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id != cell.id:
+            energy += 1
+        # Cell on the bottom
+        if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id != cell.id:
+            energy += 1
+        # Cell on the top
+        if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id != cell.id:
+            energy += 1
+        return energy
+
+    def environment_states(self, cell):
+        if cell.x - 1 >= 0 and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x - 1].id != cell.id \
+            and not self.board[cell.y - 1][cell.x - 1].id in cell.environment:
+            cell.environment.append(self.board[cell.y - 1][cell.x - 1].id)
+        # Cell on the top right
+        if cell.x + 1 < self.cols and cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x + 1].id != cell.id \
+            and not self.board[cell.y - 1][cell.x + 1].id in cell.environment:
+            cell.environment.append(self.board[cell.y - 1][cell.x + 1].id)
+        # Cell on the bottom left
+        if cell.x - 1 >= 0 and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x - 1].id != cell.id \
+            and not self.board[cell.y + 1][cell.x - 1].id in cell.environment:
+            cell.environment.append(self.board[cell.y + 1][cell.x - 1].id)
+        # Cell on the bottom right
+        if cell.x + 1 < self.cols and cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x + 1].id != cell.id \
+            and not self.board[cell.y + 1][cell.x + 1].id in cell.environment:
+            cell.environment.append(self.board[cell.y + 1][cell.x + 1].id)
+        # Cell on the right
+        if cell.x + 1 < self.cols and self.board[cell.y][cell.x + 1].id != cell.id \
+            and not self.board[cell.y][cell.x + 1].id in cell.environment:
+            cell.environment.append(self.board[cell.y][cell.x + 1].id)
+        # Cell on the left
+        if cell.x - 1 >= 0 and self.board[cell.y][cell.x - 1].id != cell.id \
+            and not self.board[cell.y][cell.x - 1].id in cell.environment:
+            cell.environment.append(self.board[cell.y][cell.x - 1].id)
+        # Cell on the bottom
+        if cell.y + 1 < self.rows and self.board[cell.y + 1][cell.x].id != cell.id \
+            and not self.board[cell.y + 1][cell.x].id in cell.environment:
+            cell.environment.append(self.board[cell.y + 1][cell.x].id)
+        # Cell on the top
+        if cell.y - 1 >= 0 and self.board[cell.y - 1][cell.x].id != cell.id \
+            and not self.board[cell.y - 1][cell.x].id in cell.environment:
+            cell.environment.append(self.board[cell.y - 1][cell.x].id)
+
+    def monte_carlo(self):
+        elements = list()
+        for i in range(self.rows):
+            for j in range(self.cols):
+                elements.append(self.board[i][j])
+
+        shuffle(elements)
+        # print 'ilosc', len(elements)
+        for element in elements:
+            # print "wylosowana", element
+            self.environment_states(element)
+            # print "otoczenie", element.environment
+            energy = self.cell_energy(element)
+            # print "obecna energia", energy
+            prev_state = element.id
+            new_state = element.environment[randint(0, len(element.environment)-1)]
+            element.id = new_state
+            if energy < self.cell_energy(element):
+                element.id = prev_state
+                # print 'odrzucono'
+            element.visited = True
+
+
+
 
 
 def update(grid):
